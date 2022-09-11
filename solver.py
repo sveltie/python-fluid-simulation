@@ -50,14 +50,16 @@ class Fluid:
     def set_bnd(self, vector):
         for i in range(1, self.size - 1):
             if len(vector.shape) > 2: # 3D vector
-                # Vertical borders
-                vector[i, 0, 1] = - vector[i, 0, 1]
-                vector[i, self.size - 1, 1] = - vector[i, self.size - 1, 1]
+                vector[i, 0, 0] = vector[i, 1, 0]
+                vector[i, 0, 1] = - vector[i, 1, 1]
+                vector[i, -1, 0] = vector[i, -2, 0]
+                vector[i, -1, 1] = - vector[i, -2, 1]
 
-                # Horizontal borders
-                vector[0, i, 0] = - vector[0, i, 0]
-                vector[self.size - 1, i, 0] = - vector[self.size - 1, i, 0]
-
+                # horizontal borders
+                vector[0, i, 0] = - vector[1, i, 0]
+                vector[0, i, 1] = vector[1, i, 1]
+                vector[-1, i, 0] = - vector[-2, i, 0]
+                vector[-1, i, 1] = vector[-2, i, 1]
             else: # 2D vector
                 vector[i, 0] = vector[i, 1]
                 vector[i, -1] = vector[i, -2]
@@ -82,8 +84,11 @@ class Fluid:
             self.set_bnd(x)
 
     def diffuse(self, x, x0, diff):
-        a = self.dt * diff * (self.size - 2) * (self.size - 2)
-        self.lin_solve(x, x0, a, 1 + 6 * a)
+        if diff != 0:
+            a = self.dt * diff * (self.size - 2) * (self.size - 2)
+            self.lin_solve(x, x0, a, 1 + 6 * a)
+        else:
+            x[:, :] = x0[:, :]
 
     def project(self, velocX, velocY, p, div):
         for i in range(1, self.size - 1):
@@ -103,7 +108,7 @@ class Fluid:
         for i in range(1, self.size - 1):
             for j in range(1, self.size - 1):
                 velocX[j, i] -= 0.5 * (p[j + 1, i] - p[j - 1, i]) * self.size
-                velocY[j, i] -= 0.5 * (p[j, i + 1] - p[j, i - 1]) * self.size - p[j, i] * self.size
+                velocY[j, i] -= 0.5 * (p[j, i + 1] - p[j, i - 1]) * self.size
 
         self.set_bnd(self.veloc)
 
