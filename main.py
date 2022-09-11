@@ -1,3 +1,9 @@
+"""
+Based on:
+Jos Stam Real-Time Fluid Dynamics       https://www.researchgate.net/publication/2560062_Real-Time_Fluid_Dynamics_for_Games       
+Mikeash Fluid Simulation for Dummies    https://www.mikeash.com/pyblog/fluid-simulation-for-dummies.html
+"""
+
 import sys
 import numpy as np
 from solver import Fluid
