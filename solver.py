@@ -47,31 +47,34 @@ class Fluid:
         # Move the density around according to the velocities
         self.advect(density, s, veloc)
 
-    def set_bnd(self, vector):
+    def set_bnd(self, x):
         for i in range(1, self.size - 1):
-            if len(vector.shape) > 2: # 3D vector
-                vector[i, 0, 0] = vector[i, 1, 0]
-                vector[i, 0, 1] = - vector[i, 1, 1]
-                vector[i, -1, 0] = vector[i, -2, 0]
-                vector[i, -1, 1] = - vector[i, -2, 1]
+            if len(x.shape) > 2: # 3D vector
+                # Vertical Border
+                x[i, 0, 0] = x[i, 1, 0]
+                x[i, 0, 1] = - x[i, 1, 1]
+                x[i, -1, 0] = x[i, -2, 0]
+                x[i, -1, 1] = - x[i, -2, 1]
 
-                # horizontal borders
-                vector[0, i, 0] = - vector[1, i, 0]
-                vector[0, i, 1] = vector[1, i, 1]
-                vector[-1, i, 0] = - vector[-2, i, 0]
-                vector[-1, i, 1] = vector[-2, i, 1]
+                # Horizontal Border
+                x[0, i, 0] = - x[1, i, 0]
+                x[0, i, 1] = x[1, i, 1]
+                x[-1, i, 0] = - x[-2, i, 0]
+                x[-1, i, 1] = x[-2, i, 1]
             else: # 2D vector
-                vector[i, 0] = vector[i, 1]
-                vector[i, -1] = vector[i, -2]
+                # Vertical Border
+                x[i, 0] = x[i, 1]
+                x[i, -1] = x[i, -2]
 
-                vector[0, i] = vector[1, i]
-                vector[-1, i] = vector[-2, i]
+                # Horizontal Border
+                x[0, i] = x[1, i]
+                x[-1, i] = x[-2, i]
 
         # Set the corners
-        vector[0, 0] = 0.5 * (vector[1, 0] + vector[0, 1])
-        vector[0, -1] = 0.5 * (vector[1, -1] + vector[0, -2])
-        vector[-1, 0] = 0.5 * (vector[-2, 0] + vector[- 1, 1])
-        vector[-1, -1] = 0.5 * (vector[-2, -1] + vector[-1, -2])
+        x[0, 0] = 0.5 * (x[1, 0] + x[0, 1])
+        x[0, -1] = 0.5 * (x[1, -1] + x[0, -2])
+        x[-1, 0] = 0.5 * (x[-2, 0] + x[- 1, 1])
+        x[-1, -1] = 0.5 * (x[-2, -1] + x[-1, -2])
 
     def lin_solve(self, x, x0, a, c):
         cRecip = 1.0 / c
@@ -111,8 +114,14 @@ class Fluid:
                 velocY[j, i] -= 0.5 * (p[j, i + 1] - p[j, i - 1]) * self.size
 
         self.set_bnd(self.veloc)
-
+    
+    # Linear backtrace
     def advect(self, d, d0, velocity):
+        """
+        Linear backtrace function implementation to find the particles 
+        which end up exactly at the cell centers by tracing backwards 
+        in time from the cell centers
+        """
         dtx = self.dt * (self.size - 2)
         dty = self.dt * (self.size - 2)
 
