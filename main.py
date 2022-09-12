@@ -8,7 +8,6 @@ Mikeash Fluid Simulation for Dummies    https://www.mikeash.com/pyblog/fluid-sim
 import random
 import numpy as np
 from solver import Fluid
-global test
 
 def main():
     import matplotlib.pyplot as plt
